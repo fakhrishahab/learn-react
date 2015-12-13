@@ -1,3 +1,6 @@
-var events = require('events');
+var action = require('./action');
 
-console.log('yes it\'s my new react apps');
+Object.keys(action).forEach(function(key){
+	console.log(key);
+	console.log(action[key].toString());
+})

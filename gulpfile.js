@@ -9,15 +9,15 @@ var gulp = require('gulp'),
 
 gulp.task('index', function(){
 	gulp.src('src/views/*.*')
-		.pipe(plumber())
+		// .pipe(plumber())
 		.pipe(gulp.dest('views'))
 });
 
 gulp.task('main', function(){
 	gulp.src('src/js/*.js')
-		.pipe(plumber())
+		// .pipe(plumber())
 		.pipe(browserify({ transform : 'reactify', debug : true}))
-		.pipe(concat('main.js'))
+		// .pipe(concat('main.js'))
 		.pipe(gulp.dest('./public'))
 });
 

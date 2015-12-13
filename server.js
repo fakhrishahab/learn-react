@@ -6,27 +6,29 @@ var express = require('express'),
 
 module.exports = {	
 	listenServer : function(){		
-		app
-			.engine('ejs',  function(path, options, callback){
-				fs.readFile(path, function(err, content){
-					if (err) return callback(new Error(err));	
-					// console.log(content.toString())			
-					var rendered = content.toString().replace('#title#', '<title>'+ options.title +'</title>')
-				    .replace('#message#', options.message);
-				    return callback(null, rendered);
+		app			
+			.set('view engine', 'ejs')
+			.use(express.static('./public'))
+			.use(login.routes)
+			.use(require('./api'))
+			.use('*', login.required, function(req, res, next){
+				res.render('index', { 
+					title: 'Zeeza', 
+					message: 'Baby Warehouse Online Store',
+					user : login.safe(req.user)
 				})
 			})
-			.set('view engine', 'ejs')
-			.use(express.static('public'))
-			.use(login.routes)
-			.use('/', router)			
+			// .use('/', router)			
 			.listen(3000, function(){
 				console.log('listening on port 3000')
 			})
 
-		router.use('/', function(req, res, next){
-			res.render('index', { title: 'Zeeza :: Home', message: 'Baby Warehouse Online Store'})
-		})
+		// router.get('*',  function(req, res, next){
+		// 	res.render('index', { 
+		// 		title: 'Zeeza :: Home', 
+		// 		message: 'Baby Warehouse Online Store'
+		// 	})
+		// })
 		router.use('/about/:id', function(req, res, next){
 			res.send(req.params.id)
 		})

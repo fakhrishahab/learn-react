@@ -22,7 +22,7 @@ passport.use(new LocalStrategy(function(username, password, done){
 
 }))
 
-passport.serializeUser(function(user, done){
+passport.serializeUser(function(user, done){	
 	done(null, user.cid)
 })
 
@@ -45,6 +45,61 @@ router.use(passport.session())
 
 router.get('/login', function(req, res){
 	res.render('login', { title: 'Zeeza :: Login', message: 'Please Login'})
+});
+
+router.post('/signup', function(req, res, next){
+	if(users.where({username : req.body.username}).items.length === 0){
+		// THERE IS NO USER IN DATABASE
+		var user = {
+			fullname : req.body.fullname,
+			email : req.body.email,
+			username : req.body.username,
+			passwordHash : hash(req.body.password),
+			following : []
+		}
+
+		var userId = users.insert(user)
+
+		req.login(users.get(userId), function(err){
+			if(err) return next(err)
+				res.redirect('/')
+		});
+	}else{
+		// USER IS EXIST
+		res.redirect('/login')
+	}
+
 })
 
+router.post('/login', passport.authenticate('local', {
+	successRedirect : '/',
+	failureRedirect : '/login'
+}))
+
+router.get('/logout', function(req, res){
+	req.logout();
+	req.redirect('/login')
+})
+
+function loginRequired(req, res, next){
+	if(req.isAuthenticated()){
+		next()
+	}else{
+		res.redirect('/login')
+	}
+}
+
+function makeUserSafe(user){
+	var safeUser = {};
+
+	var safeKeys = ['cid', 'fullname', 'email', 'username', 'following'];
+
+	safeKeys.forEach(function(key){
+		safeUser[key] = user[key];
+	});
+	return safeUser;
+}
+
 exports.routes = router;
+exports.required = loginRequired;
+exports.safe = makeUserSafe;
